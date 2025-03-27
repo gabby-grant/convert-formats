@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 # Import the sys module for command-line argument handling
-import sys
+
+import argparse
+import os
 
 # Define the main function to convert FASTQ to FASTA format
 def fastq_to_fasta(input_file, output_file):
@@ -24,19 +26,23 @@ def fastq_to_fasta(input_file, output_file):
 
 # Check if the script is being run as the main program
 if __name__ == "__main__":
-    # Check if at least one command-line argument (input file) is provided
-    if len(sys.argv) < 2:
-        # If not, print usage instructions and exit
-        print(f"Usage: {sys.argv[0]} <input.fastq> [output.fasta]")
-        sys.exit(1)
-
-    # Get the input file name from the first command-line argument
-    input_file = sys.argv[1]
-    # If a second argument is provided, use it as the output file name
-    # Otherwise, create an output file name by replacing .fastq with .fasta
-    output_file = sys.argv[2] if len(sys.argv) > 2 else input_file.rsplit('.', 1)[0] + '.fasta'
-
-    # Call the conversion function
+    # create argument parses
+    parser = argparse.ArgumentParser(description='Convert FASTQ to FASTA', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    # add arguments
+    parser.add_argument('-i', '--input', required=True, help='Input FASTQ File')
+    parser.add_argument('-o', '--output', help='Output FASTA File (defaults to .fasta files)')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Print detailed progress information')
+    #parse command line arguments
+    args = parser.parse_args()
+    #set input and output file names
+    input_file = args.input
+    if not args.output:
+        output_file = os.path.splitext(input_file)[0] + '.fasta'
+    else:
+        output_file = args.output
+    # check if files exists
+    if not os.path.isfile(input_file): parser.error(f"Input file '{input_file}' does not exists")
+    if args.verbose: print(f"Converting '{input_file}' to '{output_file}'")
+    # call conversion function
     fastq_to_fasta(input_file, output_file)
-    # Print a completion message
-    print(f"Conversion complete. FASTA file saved as {output_file}")
+    print(f"Conversion complete. FASTA file saves as {output_file}")
